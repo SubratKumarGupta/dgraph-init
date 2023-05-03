@@ -1,7 +1,4 @@
-// import { type PkgInstallerMap } from "~/installers/index.js";
 import path from 'path';
-// import { scaffoldProject } from "~/helpers/scaffoldProject.js";
-// import { selectAppFile, selectIndexFile } from "~/helpers/selectBoilerplate.js";
 import { getUserPkgManager } from '../utils/getUserPkgManager.js';
 import { scaffoldProject } from './scaffoldProject.js';
 
