@@ -1,0 +1,55 @@
+{
+  "name": "dgraph-init",
+  "version": "0.0.1",
+  "description": "CLI tool for setting up a Dgraph Dev instance.",
+  "main": "index.ts",
+  "type": "module",
+  "exports": "./dist/index.js",
+  "bin": {
+    "dgraph-init": "./dist/index.js"
+  },
+  "scripts": {
+    "test": "yarn build && yarn start",
+    "start": "node dist/index.js",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SubratKumarGupta/dgraph-init.git"
+  },
+  "keywords": [
+    "CLI",
+    "tool",
+    "GraphQl",
+    "Dgraph"
+  ],
+  "author": "subratgupta",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SubratKumarGupta/dgraph-init/issues"
+  },
+  "homepage": "https://github.com/SubratKumarGupta/dgraph-init#readme",
+  "dependencies": {
+    "chalk": "^5.2.0",
+    "commander": "^10.0.1",
+    "execa": "^7.1.1",
+    "fs-extra": "^11.1.1",
+    "gradient-string": "^2.0.2",
+    "inquirer": "^9.2.0"
+  },
+  "devDependencies": {
+    "@total-typescript/ts-reset": "^0.4.2",
+    "@types/fs-extra": "^11.0.1",
+    "@types/gradient-string": "^1.1.2",
+    "@types/inquirer": "^9.0.3",
+    "@types/node": "^18.16.3",
+    "@typescript-eslint/eslint-plugin": "^5.59.2",
+    "@typescript-eslint/parser": "^5.59.2",
+    "eslint": "^8.39.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.8.8",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4"
+  }
+}
