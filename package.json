@@ -2,7 +2,6 @@
   "name": "dgraph-init",
   "version": "0.0.1",
   "description": "CLI tool for setting up a Dgraph Dev instance.",
-  "main": "index.ts",
   "type": "module",
   "exports": "./dist/index.js",
   "bin": {
@@ -23,7 +22,7 @@
     "GraphQl",
     "Dgraph"
   ],
-  "author": "subratgupta",
+  "author": "subratgupta <contact@subrat.me> (https://subrat.me)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/SubratKumarGupta/dgraph-init/issues"
