@@ -1,0 +1,753 @@
+#######################
+# Input Schema
+#######################
+
+type Account {
+	id: ID
+	type: String
+	provider: String @search(by: [hash])
+	providerAccountId: String @search(by: [hash])
+	refreshToken: String
+	expires_at: Int64
+	accessToken: String
+	token_type: String
+	refresh_token: String
+	access_token: String
+	scope: String
+	id_token: String
+	session_state: String
+	user(filter: UserFilter): User @hasInverse(field: "accounts")
+}
+
+type Session {
+	id: ID
+	expires: DateTime
+	sessionToken: String @search(by: [hash])
+	user(filter: UserFilter): User @hasInverse(field: "sessions")
+}
+
+type User {
+	id: ID
+	name: String
+	email: String @search(by: [hash])
+	emailVerified: DateTime
+	image: String
+	accounts(filter: AccountFilter, order: AccountOrder, first: Int, offset: Int): [Account] @hasInverse(field: "user")
+	sessions(filter: SessionFilter, order: SessionOrder, first: Int, offset: Int): [Session] @hasInverse(field: "user")
+	accountsAggregate(filter: AccountFilter): AccountAggregateResult
+	sessionsAggregate(filter: SessionFilter): SessionAggregateResult
+}
+
+type VerificationToken {
+	id: ID
+	identifier: String @search(by: [hash])
+	token: String @search(by: [hash])
+	expires: DateTime
+}
+
+#######################
+# Extended Definitions
+#######################
+
+"""
+The Int64 scalar type represents a signed 64‐bit numeric non‐fractional value.
+Int64 can represent values in range [-(2^63),(2^63 - 1)].
+"""
+scalar Int64
+
+"""
+The DateTime scalar type represents date and time as a string in RFC3339 format.
+For example: "1985-04-12T23:20:50.52Z" represents 20 mins 50.52 secs after the 23rd hour of Apr 12th 1985 in UTC.
+"""
+scalar DateTime
+
+input IntRange{
+	min: Int!
+	max: Int!
+}
+
+input FloatRange{
+	min: Float!
+	max: Float!
+}
+
+input Int64Range{
+	min: Int64!
+	max: Int64!
+}
+
+input DateTimeRange{
+	min: DateTime!
+	max: DateTime!
+}
+
+input StringRange{
+	min: String!
+	max: String!
+}
+
+enum DgraphIndex {
+	int
+	int64
+	float
+	bool
+	hash
+	exact
+	term
+	fulltext
+	trigram
+	regexp
+	year
+	month
+	day
+	hour
+	geo
+}
+
+input AuthRule {
+	and: [AuthRule]
+	or: [AuthRule]
+	not: AuthRule
+	rule: String
+}
+
+enum HTTPMethod {
+	GET
+	POST
+	PUT
+	PATCH
+	DELETE
+}
+
+enum Mode {
+	BATCH
+	SINGLE
+}
+
+input CustomHTTP {
+	url: String!
+	method: HTTPMethod!
+	body: String
+	graphql: String
+	mode: Mode
+	forwardHeaders: [String!]
+	secretHeaders: [String!]
+	introspectionHeaders: [String!]
+	skipIntrospection: Boolean
+}
+
+type Point {
+	longitude: Float!
+	latitude: Float!
+}
+
+input PointRef {
+	longitude: Float!
+	latitude: Float!
+}
+
+input NearFilter {
+	distance: Float!
+	coordinate: PointRef!
+}
+
+input PointGeoFilter {
+	near: NearFilter
+	within: WithinFilter
+}
+
+type PointList {
+	points: [Point!]!
+}
+
+input PointListRef {
+	points: [PointRef!]!
+}
+
+type Polygon {
+	coordinates: [PointList!]!
+}
+
+input PolygonRef {
+	coordinates: [PointListRef!]!
+}
+
+type MultiPolygon {
+	polygons: [Polygon!]!
+}
+
+input MultiPolygonRef {
+	polygons: [PolygonRef!]!
+}
+
+input WithinFilter {
+	polygon: PolygonRef!
+}
+
+input ContainsFilter {
+	point: PointRef
+	polygon: PolygonRef
+}
+
+input IntersectsFilter {
+	polygon: PolygonRef
+	multiPolygon: MultiPolygonRef
+}
+
+input PolygonGeoFilter {
+	near: NearFilter
+	within: WithinFilter
+	contains: ContainsFilter
+	intersects: IntersectsFilter
+}
+
+input GenerateQueryParams {
+	get: Boolean
+	query: Boolean
+	password: Boolean
+	aggregate: Boolean
+}
+
+input GenerateMutationParams {
+	add: Boolean
+	update: Boolean
+	delete: Boolean
+}
+
+directive @hasInverse(field: String!) on FIELD_DEFINITION
+directive @search(by: [DgraphIndex!]) on FIELD_DEFINITION
+directive @dgraph(type: String, pred: String) on OBJECT | INTERFACE | FIELD_DEFINITION
+directive @id on FIELD_DEFINITION
+directive @withSubscription on OBJECT | INTERFACE | FIELD_DEFINITION
+directive @secret(field: String!, pred: String) on OBJECT | INTERFACE
+directive @auth(
+	password: AuthRule
+	query: AuthRule,
+	add: AuthRule,
+	update: AuthRule,
+	delete: AuthRule) on OBJECT | INTERFACE
+directive @custom(http: CustomHTTP, dql: String) on FIELD_DEFINITION
+directive @remote on OBJECT | INTERFACE | UNION | INPUT_OBJECT | ENUM
+directive @remoteResponse(name: String) on FIELD_DEFINITION
+directive @cascade(fields: [String]) on FIELD
+directive @lambda on FIELD_DEFINITION
+directive @lambdaOnMutate(add: Boolean, update: Boolean, delete: Boolean) on OBJECT | INTERFACE
+directive @cacheControl(maxAge: Int!) on QUERY
+directive @generate(
+	query: GenerateQueryParams,
+	mutation: GenerateMutationParams,
+	subscription: Boolean) on OBJECT | INTERFACE
+
+input IntFilter {
+	eq: Int
+	in: [Int]
+	le: Int
+	lt: Int
+	ge: Int
+	gt: Int
+	between: IntRange
+}
+
+input Int64Filter {
+	eq: Int64
+	in: [Int64]
+	le: Int64
+	lt: Int64
+	ge: Int64
+	gt: Int64
+	between: Int64Range
+}
+
+input FloatFilter {
+	eq: Float
+	in: [Float]
+	le: Float
+	lt: Float
+	ge: Float
+	gt: Float
+	between: FloatRange
+}
+
+input DateTimeFilter {
+	eq: DateTime
+	in: [DateTime]
+	le: DateTime
+	lt: DateTime
+	ge: DateTime
+	gt: DateTime
+	between: DateTimeRange
+}
+
+input StringTermFilter {
+	allofterms: String
+	anyofterms: String
+}
+
+input StringRegExpFilter {
+	regexp: String
+}
+
+input StringFullTextFilter {
+	alloftext: String
+	anyoftext: String
+}
+
+input StringExactFilter {
+	eq: String
+	in: [String]
+	le: String
+	lt: String
+	ge: String
+	gt: String
+	between: StringRange
+}
+
+input StringHashFilter {
+	eq: String
+	in: [String]
+}
+
+#######################
+# Generated Types
+#######################
+
+type AccountAggregateResult {
+	count: Int
+	typeMin: String
+	typeMax: String
+	providerMin: String
+	providerMax: String
+	providerAccountIdMin: String
+	providerAccountIdMax: String
+	refreshTokenMin: String
+	refreshTokenMax: String
+	expires_atMin: Int64
+	expires_atMax: Int64
+	expires_atSum: Int64
+	expires_atAvg: Float
+	accessTokenMin: String
+	accessTokenMax: String
+	token_typeMin: String
+	token_typeMax: String
+	refresh_tokenMin: String
+	refresh_tokenMax: String
+	access_tokenMin: String
+	access_tokenMax: String
+	scopeMin: String
+	scopeMax: String
+	id_tokenMin: String
+	id_tokenMax: String
+	session_stateMin: String
+	session_stateMax: String
+}
+
+type AddAccountPayload {
+	account(filter: AccountFilter, order: AccountOrder, first: Int, offset: Int): [Account]
+	numUids: Int
+}
+
+type AddSessionPayload {
+	session(filter: SessionFilter, order: SessionOrder, first: Int, offset: Int): [Session]
+	numUids: Int
+}
+
+type AddUserPayload {
+	user(filter: UserFilter, order: UserOrder, first: Int, offset: Int): [User]
+	numUids: Int
+}
+
+type AddVerificationTokenPayload {
+	verificationToken(filter: VerificationTokenFilter, order: VerificationTokenOrder, first: Int, offset: Int): [VerificationToken]
+	numUids: Int
+}
+
+type DeleteAccountPayload {
+	account(filter: AccountFilter, order: AccountOrder, first: Int, offset: Int): [Account]
+	msg: String
+	numUids: Int
+}
+
+type DeleteSessionPayload {
+	session(filter: SessionFilter, order: SessionOrder, first: Int, offset: Int): [Session]
+	msg: String
+	numUids: Int
+}
+
+type DeleteUserPayload {
+	user(filter: UserFilter, order: UserOrder, first: Int, offset: Int): [User]
+	msg: String
+	numUids: Int
+}
+
+type DeleteVerificationTokenPayload {
+	verificationToken(filter: VerificationTokenFilter, order: VerificationTokenOrder, first: Int, offset: Int): [VerificationToken]
+	msg: String
+	numUids: Int
+}
+
+type SessionAggregateResult {
+	count: Int
+	expiresMin: DateTime
+	expiresMax: DateTime
+	sessionTokenMin: String
+	sessionTokenMax: String
+}
+
+type UpdateAccountPayload {
+	account(filter: AccountFilter, order: AccountOrder, first: Int, offset: Int): [Account]
+	numUids: Int
+}
+
+type UpdateSessionPayload {
+	session(filter: SessionFilter, order: SessionOrder, first: Int, offset: Int): [Session]
+	numUids: Int
+}
+
+type UpdateUserPayload {
+	user(filter: UserFilter, order: UserOrder, first: Int, offset: Int): [User]
+	numUids: Int
+}
+
+type UpdateVerificationTokenPayload {
+	verificationToken(filter: VerificationTokenFilter, order: VerificationTokenOrder, first: Int, offset: Int): [VerificationToken]
+	numUids: Int
+}
+
+type UserAggregateResult {
+	count: Int
+	nameMin: String
+	nameMax: String
+	emailMin: String
+	emailMax: String
+	emailVerifiedMin: DateTime
+	emailVerifiedMax: DateTime
+	imageMin: String
+	imageMax: String
+}
+
+type VerificationTokenAggregateResult {
+	count: Int
+	identifierMin: String
+	identifierMax: String
+	tokenMin: String
+	tokenMax: String
+	expiresMin: DateTime
+	expiresMax: DateTime
+}
+
+#######################
+# Generated Enums
+#######################
+
+enum AccountHasFilter {
+	type
+	provider
+	providerAccountId
+	refreshToken
+	expires_at
+	accessToken
+	token_type
+	refresh_token
+	access_token
+	scope
+	id_token
+	session_state
+	user
+}
+
+enum AccountOrderable {
+	type
+	provider
+	providerAccountId
+	refreshToken
+	expires_at
+	accessToken
+	token_type
+	refresh_token
+	access_token
+	scope
+	id_token
+	session_state
+}
+
+enum SessionHasFilter {
+	expires
+	sessionToken
+	user
+}
+
+enum SessionOrderable {
+	expires
+	sessionToken
+}
+
+enum UserHasFilter {
+	name
+	email
+	emailVerified
+	image
+	accounts
+	sessions
+}
+
+enum UserOrderable {
+	name
+	email
+	emailVerified
+	image
+}
+
+enum VerificationTokenHasFilter {
+	identifier
+	token
+	expires
+}
+
+enum VerificationTokenOrderable {
+	identifier
+	token
+	expires
+}
+
+#######################
+# Generated Inputs
+#######################
+
+input AccountFilter {
+	id: [ID!]
+	provider: StringHashFilter
+	providerAccountId: StringHashFilter
+	has: [AccountHasFilter]
+	and: [AccountFilter]
+	or: [AccountFilter]
+	not: AccountFilter
+}
+
+input AccountOrder {
+	asc: AccountOrderable
+	desc: AccountOrderable
+	then: AccountOrder
+}
+
+input AccountPatch {
+	type: String
+	provider: String
+	providerAccountId: String
+	refreshToken: String
+	expires_at: Int64
+	accessToken: String
+	token_type: String
+	refresh_token: String
+	access_token: String
+	scope: String
+	id_token: String
+	session_state: String
+	user: UserRef
+}
+
+input AccountRef {
+	id: ID
+	type: String
+	provider: String
+	providerAccountId: String
+	refreshToken: String
+	expires_at: Int64
+	accessToken: String
+	token_type: String
+	refresh_token: String
+	access_token: String
+	scope: String
+	id_token: String
+	session_state: String
+	user: UserRef
+}
+
+input AddAccountInput {
+	type: String
+	provider: String
+	providerAccountId: String
+	refreshToken: String
+	expires_at: Int64
+	accessToken: String
+	token_type: String
+	refresh_token: String
+	access_token: String
+	scope: String
+	id_token: String
+	session_state: String
+	user: UserRef
+}
+
+input AddSessionInput {
+	expires: DateTime
+	sessionToken: String
+	user: UserRef
+}
+
+input AddUserInput {
+	name: String
+	email: String
+	emailVerified: DateTime
+	image: String
+	accounts: [AccountRef]
+	sessions: [SessionRef]
+}
+
+input AddVerificationTokenInput {
+	identifier: String
+	token: String
+	expires: DateTime
+}
+
+input SessionFilter {
+	id: [ID!]
+	sessionToken: StringHashFilter
+	has: [SessionHasFilter]
+	and: [SessionFilter]
+	or: [SessionFilter]
+	not: SessionFilter
+}
+
+input SessionOrder {
+	asc: SessionOrderable
+	desc: SessionOrderable
+	then: SessionOrder
+}
+
+input SessionPatch {
+	expires: DateTime
+	sessionToken: String
+	user: UserRef
+}
+
+input SessionRef {
+	id: ID
+	expires: DateTime
+	sessionToken: String
+	user: UserRef
+}
+
+input UpdateAccountInput {
+	filter: AccountFilter!
+	set: AccountPatch
+	remove: AccountPatch
+}
+
+input UpdateSessionInput {
+	filter: SessionFilter!
+	set: SessionPatch
+	remove: SessionPatch
+}
+
+input UpdateUserInput {
+	filter: UserFilter!
+	set: UserPatch
+	remove: UserPatch
+}
+
+input UpdateVerificationTokenInput {
+	filter: VerificationTokenFilter!
+	set: VerificationTokenPatch
+	remove: VerificationTokenPatch
+}
+
+input UserFilter {
+	id: [ID!]
+	email: StringHashFilter
+	has: [UserHasFilter]
+	and: [UserFilter]
+	or: [UserFilter]
+	not: UserFilter
+}
+
+input UserOrder {
+	asc: UserOrderable
+	desc: UserOrderable
+	then: UserOrder
+}
+
+input UserPatch {
+	name: String
+	email: String
+	emailVerified: DateTime
+	image: String
+	accounts: [AccountRef]
+	sessions: [SessionRef]
+}
+
+input UserRef {
+	id: ID
+	name: String
+	email: String
+	emailVerified: DateTime
+	image: String
+	accounts: [AccountRef]
+	sessions: [SessionRef]
+}
+
+input VerificationTokenFilter {
+	id: [ID!]
+	identifier: StringHashFilter
+	token: StringHashFilter
+	has: [VerificationTokenHasFilter]
+	and: [VerificationTokenFilter]
+	or: [VerificationTokenFilter]
+	not: VerificationTokenFilter
+}
+
+input VerificationTokenOrder {
+	asc: VerificationTokenOrderable
+	desc: VerificationTokenOrderable
+	then: VerificationTokenOrder
+}
+
+input VerificationTokenPatch {
+	identifier: String
+	token: String
+	expires: DateTime
+}
+
+input VerificationTokenRef {
+	id: ID
+	identifier: String
+	token: String
+	expires: DateTime
+}
+
+#######################
+# Generated Query
+#######################
+
+type Query {
+	getAccount(id: ID!): Account
+	queryAccount(filter: AccountFilter, order: AccountOrder, first: Int, offset: Int): [Account]
+	aggregateAccount(filter: AccountFilter): AccountAggregateResult
+	getSession(id: ID!): Session
+	querySession(filter: SessionFilter, order: SessionOrder, first: Int, offset: Int): [Session]
+	aggregateSession(filter: SessionFilter): SessionAggregateResult
+	getUser(id: ID!): User
+	queryUser(filter: UserFilter, order: UserOrder, first: Int, offset: Int): [User]
+	aggregateUser(filter: UserFilter): UserAggregateResult
+	getVerificationToken(id: ID!): VerificationToken
+	queryVerificationToken(filter: VerificationTokenFilter, order: VerificationTokenOrder, first: Int, offset: Int): [VerificationToken]
+	aggregateVerificationToken(filter: VerificationTokenFilter): VerificationTokenAggregateResult
+}
+
+#######################
+# Generated Mutations
+#######################
+
+type Mutation {
+	addAccount(input: [AddAccountInput!]!): AddAccountPayload
+	updateAccount(input: UpdateAccountInput!): UpdateAccountPayload
+	deleteAccount(filter: AccountFilter!): DeleteAccountPayload
+	addSession(input: [AddSessionInput!]!): AddSessionPayload
+	updateSession(input: UpdateSessionInput!): UpdateSessionPayload
+	deleteSession(filter: SessionFilter!): DeleteSessionPayload
+	addUser(input: [AddUserInput!]!): AddUserPayload
+	updateUser(input: UpdateUserInput!): UpdateUserPayload
+	deleteUser(filter: UserFilter!): DeleteUserPayload
+	addVerificationToken(input: [AddVerificationTokenInput!]!): AddVerificationTokenPayload
+	updateVerificationToken(input: UpdateVerificationTokenInput!): UpdateVerificationTokenPayload
+	deleteVerificationToken(filter: VerificationTokenFilter!): DeleteVerificationTokenPayload
+}

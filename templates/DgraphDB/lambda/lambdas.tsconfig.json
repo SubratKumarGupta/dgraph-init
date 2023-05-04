@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "outDir": "../lambda",
+    "module": "ES2020",
+    "isolatedModules": true,
+    "moduleResolution": "nodenext"
+  },
+  "exclude": ["node_modules", "src", "dgraphdb"],
+  "include": ["./lambdas.ts"]
+}

@@ -1,0 +1,6 @@
+query getGQLSchema {
+  getGQLSchema {
+    schema
+    generatedSchema
+  }
+}

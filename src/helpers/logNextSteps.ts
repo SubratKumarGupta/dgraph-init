@@ -27,5 +27,5 @@ export const logNextSteps = ({
     }
   }
 
-  logger.info(`  ${pkgManager === 'npm' ? 'npm run' : pkgManager} dev`);
+  logger.info(`  ${pkgManager === 'npm' ? 'npm run' : pkgManager} db up`);
 };

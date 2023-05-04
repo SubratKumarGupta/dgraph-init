@@ -1,0 +1,49 @@
+version: '3.2'
+services:
+  zero:
+    image: dgraph/dgraph:latest
+    volumes:
+      - zero:/dgraph
+    ports:
+      - 5080:5080
+      - 6080:6080
+    restart: on-failure
+    command: dgraph zero --my=zero:5080
+  alpha:
+    image: dgraph/dgraph:latest
+    environment:
+      DGRAPH_ALPHA_GRAPHQL_LAMBDA_URL: 'http://localhost:8686/graphql-worker'
+    volumes:
+      - alpha:/dgraph
+    ports:
+      - 8080:8080
+      - 9080:9080
+    restart: on-failure
+    command: dgraph alpha --my=alpha:7080 --zero=zero:5080 --security " token=${DEV_DGRAPH_GRAPHQL_KEY} ; whitelist=0.0.0.0/0 " --cache size-mb=1024 --graphql lambda-url=http://host.docker.internal:8686/graphql-worker
+  graph_lambda:
+    image: dgraph/dgraph-lambda:latest
+    ports:
+      - '8686:8686'
+    depends_on:
+      - alpha
+    volumes:
+      - type: bind
+        source: ./lambda/lambdas.js
+        target: /app/script/script.js
+        read_only: true
+    environment:
+      DGRAPH_URL: http://host.docker.internal:8080
+  ratel:
+    image: dgraph/ratel:latest
+    ports:
+      - 8000:8000
+    command: dgraph-ratel
+volumes:
+  zero:
+  alpha:
+# #whitelist=172.18.0.1
+# docker run -it --rm -p 8686:8686 -v /path/to/script.js:/app/script/script.js -e DGRAPH_URL=http://host.docker.internal:8080 dgraph/dgraph-lambda
+
+# ODhhZWIwMzg5NTk0YmRjZWVhYzllODk4ZTU3ODA0NDQ
+# ODhhZWIwMzg5NTk0YmRjZWVhYzllODk4ZTU3ODA0NDQ
+
