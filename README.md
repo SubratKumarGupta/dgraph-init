@@ -2,7 +2,7 @@
 
 ## CLI tool for setting up dev instance of dgraph database
 
-![dgraph-init](https://i.ibb.co/pPK2q3B/dgrap-init-removebg-preview.png)
+![dgraph-init](https://raw.githubusercontent.com/SubratKumarGupta/dgraph-init/main/images/dgraph-init-logo.png)
 
 <h2 id="getting-started">Getting Started</h2>
 
